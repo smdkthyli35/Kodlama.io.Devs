@@ -27,9 +27,12 @@ namespace Kodlama.io.Devs.Application.Features.Languages.Commands.UpdateLanguage
 
         public async Task<UpdateLanguageDto> Handle(UpdateLanguageCommand request, CancellationToken cancellationToken)
         {
+            var isExistsLanguage = await _languageRepository.GetAsync(l => l.Id == request.Id);
+
+            _languageBusinessRules.LanguageShouldExistWhenRequested(isExistsLanguage);
             await _languageBusinessRules.LanguageNameCanNotBeDuplicatedWhenUpdated(request.Name);
 
-            Language mappedLanguage = _mapper.Map<Language>(request);
+            Language mappedLanguage = _mapper.Map<Language>(isExistsLanguage);
             Language updatedLanguage = await _languageRepository.UpdateAsync(mappedLanguage);
             UpdateLanguageDto updatedLanguageDto = _mapper.Map<UpdateLanguageDto>(updatedLanguage);
             return updatedLanguageDto;
